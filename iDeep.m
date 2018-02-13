@@ -98,23 +98,29 @@ end
 
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[FileName,PathName] = uigetfile('*.mat','Select image');
-images = load(strcat(PathName,"\",FileName));
-%whos('-file',strcat(PathName,'\',FileName));
-%TODO: Get points clicked on image , How many point per imaegn we need to
-% label??
-for n = 1:70
-    %Imagenes originales
-    imshow(images.imagenes(:,:,n),[])
-    
-    %Mascaras (como deberia quedar la imagen al ser 'recortada')
-    %imshow(images.mascaras(:,:,n),[])
-    waitforbuttonpress
-end
-
+    % hObject    handle to pushbutton1 (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    [FileName,PathName] = uigetfile('*.mat','Select image');
+    if FileName
+        images = load(strcat(PathName,"\",FileName));
+        %whos('-file',strcat(PathName,'\',FileName));
+        for n = 1:70
+            %Imagenes originales
+            imshow(images.imagenes(:,:,n),[])
+            
+            %Mascaras (como deberia quedar la imagen al ser 'recortada')
+            %imshow(images.mascaras(:,:,n),[])
+           
+            %Obtencion de los pixeles clicados (de momento 4) tanto
+            %posicion como el color en RGB TODO: que hacer con estos puntos
+            [x,y] = ginput(4);
+            for i =1:4
+                disp(images.imagenes(ceil(x(i)),ceil(y(i)),n))
+            end
+            waitforbuttonpress
+        end
+    end
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
