@@ -58,6 +58,11 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+%whos handles
+% set the table size to be 2x2
+set(handles.uitable2,'Data',cell(0,2));
+global IControlPoints;
+IControlPoints = [];
 % UIWAIT makes iDeep wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -98,72 +103,65 @@ end
 
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
-    % hObject    handle to pushbutton1 (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
+    global images
     [FileName,PathName] = uigetfile('*.mat','Select image');
     if FileName
         images = load(strcat(PathName,"\",FileName));
-        %whos('-file',strcat(PathName,'\',FileName));
-        for n = 1:70
-            %Imagenes originales
-            imshow(images.imagenes(:,:,n),[])
-            
-            %Mascaras (como deberia quedar la imagen al ser 'recortada')
-            %imshow(images.mascaras(:,:,n),[])
-           
-            %Obtencion de los pixeles clicados (de momento 4) tanto
-            %posicion como el color en RGB TODO: que hacer con estos puntos
-            [x,y] = ginput(4);
-            for i =1:4
-                disp(images.imagenes(ceil(x(i)),ceil(y(i)),n))
-            end
-            waitforbuttonpress
-        end
+        showImage(1);
+        
     end
 
+    
+%shows the number imgNumber image of the images loaded if the images loaded
+%are only one then imgNumber havea to be 1.
+function showImage(imgNumber)
+    global images
+    %Mascaras (como deberia quedar la imagen al ser 'recortada')
+    %imshow(images.mascaras(:,:,n),[])
+
+    %Imagenes originales
+    imshow(images.imagenes(:,:,imgNumber),[])
+    
+    
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 [file,path] = uiputfile('*.mat','Save file name');
 
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 [FileName,PathName] = uigetfile('*.mat','Select network file');
 
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 [file,path] = uiputfile('*.mat','Save network');
 
 
 % --- Executes on button press in pushbutton9.
 function pushbutton9_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on button press in pushbutton10.
 function pushbutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on button press in checkbox1.
 function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+    global IControlPoints
+    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
+    if get(hObject,'Value')
+        [x,y] = getpts();
+        sizeX = size(x);
+        numberPoints = sizeX(1);
+    
+        %coger la clase del comboBox
+        selectedClass = 1;
+        if numberPoints
+            for i =1:numberPoints
+               IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
+            end
+            set(handles.uitable2,'data',IControlPoints);
+        end
+    end
+    key = get(gcf,'CurrentKey');
 % Hint: get(hObject,'Value') returns toggle state of checkbox1
