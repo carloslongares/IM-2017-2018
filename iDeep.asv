@@ -46,26 +46,22 @@ end
 
 % --- Executes just before iDeep is made visible.
 function iDeep_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to iDeep (see VARARGIN)
-
 % Choose default command line output for iDeep
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-%whos handles
-% set the table size to be 2x2
-set(handles.uitable2,'Data',cell(0,2));
-%ejemplo insert row on table
-global images;
+% INICIALIZACION VARIABLE GLOBALES
+global IControlPoints;
+IControlPoints = [];
+global imagesNumber;
+imagesNumber = 0;
+global currentImage;
+currentImage = 0;
 
-% UIWAIT makes iDeep wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+%CONFIGURACIONES INICIALES DE LOS ELEMENTOS DE LA GUI
+set(handles.uitable2,'Data',cell(0,3));
 
 
 % --- Outputs from this function are returned to the command line.
@@ -81,20 +77,12 @@ varargout{1} = handles.output;
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
 
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -104,25 +92,65 @@ end
 
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
-    global images
-    [FileName,PathName] = uigetfile('*.mat','Select image');
-    if FileName
-        images = load(strcat(PathName,"\",FileName));
-        showImage(1);
-        
-    end
+global images;
+global imagesNumber;
+[FileName,PathName] = uigetfile('*.mat','Select image');
+if FileName
+    images = load(strcat(PathName,"\",FileName));
+    n = size(images.imagenes);
+    imagesNumber = n(3);
+    showNextImage();
+end
 
     
 %shows the number imgNumber image of the images loaded if the images loaded
 %are only one then imgNumber havea to be 1.
-function showImage(imgNumber)
-    global images
+function showNextImage()
+global images
+global currentImage
+global imagesNumber;
+currentImage = currentImage+1;
+if currentImage <= imagesNumber
     %Mascaras (como deberia quedar la imagen al ser 'recortada')
     %imshow(images.mascaras(:,:,n),[])
 
     %Imagenes originales
-    imshow(images.imagenes(:,:,imgNumber),[])
+    imshow(images.imagenes(:,:,currentImage),[])
+end
+
+% --- Executes on button press in checkbox1.
+function checkbox1_Callback(hObject, eventdata, handles)
+    global IControlPoints
+    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
+    if get(hObject,'Value')
+        [x,y] = getpts();
+        sizeX = size(x);
+        numberPoints = sizeX(1);
     
+        %coger la clase del comboBox
+        selectedClass = get(handles.popupmenu1,'Value');
+        if numberPoints
+            for i =1:numberPoints
+               IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
+            end
+            set(handles.uitable2,'data',IControlPoints);
+        end
+        showPoints();
+    end
+    set(hObject,'Value',0) 
+% Hint: get(hObject,'Value') returns toggle state of checkbox1
+
+
+function showPoints()
+    global IControlPoints;
+    n = size(IControlPoints(:,1));
+    axis on
+    hold on;
+    color = ['r','b'];
+    for i = 1:n
+        plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+    end
+
     
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -146,20 +174,8 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 function pushbutton10_Callback(hObject, eventdata, handles)
 
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
-    if get(hObject,'Value')
-        [x,y] = getpts();();
-    end
-    sizeX = size(x);
-    selectedClass = 1;
-    if sizeX(1)
-        data = [x(1),y(1),selectedClass];
-        for i =2:sizeX(1)
-           data = [data;x(i),y(i),selectedClass];
-        end
-        set(handles.uitable2,'data',data);
-    end
-    key = get(gcf,'CurrentKey');
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
+
+% UIWAIT makes iDeep wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
