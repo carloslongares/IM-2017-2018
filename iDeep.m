@@ -22,7 +22,7 @@ function varargout = iDeep(varargin)
 
 % Edit the above text to modify the response to help iDeep
 
-% Last Modified by GUIDE v2.5 09-Feb-2018 21:54:55
+% Last Modified by GUIDE v2.5 15-Feb-2018 18:05:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,6 +100,13 @@ if FileName
     n = size(images.imagenes);
     imagesNumber = n(3);
     showNextImage();
+    %%%%%%%%%%%%%
+    set(findobj('Tag','text2'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton2'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton3'), 'Enable', 'on');
+    set(findobj('Tag','uitable2'), 'Enable', 'on');
+    set(findobj('Tag','popupmenu1'), 'Enable', 'on');
+    set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
 end
 
     
@@ -117,28 +124,6 @@ if currentImage <= imagesNumber
     %Imagenes originales
     imshow(images.imagenes(:,:,currentImage),[])
 end
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-    global IControlPoints
-    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
-    if get(hObject,'Value')
-        [x,y] = getpts();
-        sizeX = size(x);
-        numberPoints = sizeX(1);
-    
-        %coger la clase del comboBox
-        selectedClass = get(handles.popupmenu1,'Value');
-        if numberPoints
-            for i =1:numberPoints
-               IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
-            end
-            set(handles.uitable2,'data',IControlPoints);
-        end
-        showPoints();
-    end
-    set(hObject,'Value',0) 
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
 
 
 function showPoints()
@@ -159,6 +144,12 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
 [FileName,PathName] = uigetfile('*.mat','Select network file');
+if FileName
+    set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton10'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton4'), 'Enable', 'on');
+    
+end
 
 
 % --- Executes on button press in pushbutton4.
@@ -166,8 +157,11 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 [file,path] = uiputfile('*.mat','Save network');
 
 
-% --- Executes on button press in pushbutton9.
+% --- Executes on button press in pushbutton9.%TrainBTN
 function pushbutton9_Callback(hObject, eventdata, handles)
+global IControlPoints;
+IControlPoints = [];%Remove points of prev. images.
+set(findobj('Tag','uitable2'), 'Data', {})%Clear UI Table uitable2
 showNextImage()
 
 % --- Executes on button press in pushbutton10.
@@ -179,3 +173,35 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 % uiwait(handles.figure1);
 
 
+% --- Executes on button press in StartSelectionBtn.
+function StartSelectionBtn_Callback(hObject, eventdata, handles)
+global IControlPoints
+    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
+    if get(hObject,'Value')
+        set(findobj('Tag','SelectionText1'), 'Visible', 'on')
+        set(findobj('Tag','SelectionText2'), 'Visible', 'on') 
+        [x,y] = getpts();
+        set(findobj('Tag','SelectionText1'), 'Visible', 'off')
+        set(findobj('Tag','SelectionText2'), 'Visible', 'off')
+        sizeX = size(x);
+        numberPoints = sizeX(1);
+    
+        %coger la clase del comboBox
+        selectedClass = get(handles.popupmenu1,'Value');
+        if numberPoints
+            for i =1:numberPoints-1
+               if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
+               IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
+               end
+            end
+            set(handles.uitable2,'data',IControlPoints);
+        end
+        showPoints();
+        
+    end
+    
+%StartSelectionBtn
+
+% hObject    handle to StartSelectionBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
