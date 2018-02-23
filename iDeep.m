@@ -55,10 +55,18 @@ guidata(hObject, handles);
 % INICIALIZACION VARIABLE GLOBALES
 global IControlPoints;
 IControlPoints = [];
+global samples;
+samples = [];
 global imagesNumber;
 imagesNumber = 0;
 global currentImage;
 currentImage = 0;
+global currentImageSize;
+currentImageSize = 0;
+global zonePointSize;
+zonePointSize = 32;
+global classes;
+classes = [];
 
 %CONFIGURACIONES INICIALES DE LOS ELEMENTOS DE LA GUI
 set(handles.uitable2,'Data',cell(0,3));
@@ -116,25 +124,17 @@ function showNextImage()
 global images
 global currentImage
 global imagesNumber;
+global currentImageSize;
 currentImage = currentImage+1;
 if currentImage <= imagesNumber
     %Mascaras (como deberia quedar la imagen al ser 'recortada')
     %imshow(images.mascaras(:,:,n),[])
 
     %Imagenes originales
+    currentImageSize = size(images.imagenes(:,:,currentImage))
     imshow(images.imagenes(:,:,currentImage),[])
 end
 
-
-function showPoints()
-    global IControlPoints;
-    n = size(IControlPoints(:,1));
-    axis on
-    hold on;
-    color = ['r','b'];
-    for i = 1:n
-        plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
-    end
 
     
 % --- Executes on button press in pushbutton2.
@@ -159,10 +159,15 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in pushbutton9.%TrainBTN
 function pushbutton9_Callback(hObject, eventdata, handles)
-global IControlPoints;
-IControlPoints = [];%Remove points of prev. images.
-set(findobj('Tag','uitable2'), 'Data', {})%Clear UI Table uitable2
-showNextImage()
+    global samples;
+    global classes;
+%TODO: call trainCNN
+    
+    
+%TODO: Cambiar de sitio esto no debe ocurrir cuando se entrene a la red.
+%global IControlPoints;
+%IControlPoints = [];%Remove points of prev. images.
+%set(findobj('Tag','uitable2'), 'Data', {})%Clear UI Table uitable2
 
 % --- Executes on button press in pushbutton10.
 function pushbutton10_Callback(hObject, eventdata, handles)
@@ -175,8 +180,9 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in StartSelectionBtn.
 function StartSelectionBtn_Callback(hObject, eventdata, handles)
-global IControlPoints
-    %Obtencion de los pixeles clicados (de momento 4)posicion TODO: que hacer con estos puntos
+    global IControlPoints
+    global samples;
+    global classes;
     if get(hObject,'Value')
         set(findobj('Tag','SelectionText1'), 'Visible', 'on')
         set(findobj('Tag','SelectionText2'), 'Visible', 'on') 
@@ -185,22 +191,74 @@ global IControlPoints
         set(findobj('Tag','SelectionText2'), 'Visible', 'off')
         sizeX = size(x);
         numberPoints = sizeX(1);
-    
         %coger la clase del comboBox
         selectedClass = get(handles.popupmenu1,'Value');
         if numberPoints
-            for i =1:numberPoints-1
+            for i =1:numberPoints
                if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
-               IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
+                IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
+                samples = [samples;getPointsArround(x(i),y(i))];
+                classes = [classes;selectedClass];
                end
             end
             set(handles.uitable2,'data',IControlPoints);
         end
         showPoints();
-        
+    end
+
+function currentSample = getPointsArround(x,y)
+    x = checkX(x);
+    y = checkY(y);
+    global images;
+    global currentImage;
+    currentSample = zeros(32,32);
+    n= 1;
+    for i=y-16:y+16
+        m = 1;
+        for j=x-16:x+16
+            currentSample(n,m)= images.imagenes(round(i),round(j),1);
+            m=m+1;
+        end
+    n=n+1;    
+    end
+ 
+
+
+function newX =checkX(x)
+    global zonePointSize;
+    global currentImageSize;
+    imageWidth = currentImageSize(2);
+    newX = x
+    if x < zonePointSize
+        newX = (zonePointSize - x) +x;
+    end
+    if x > imageWidth - zonePointSize
+        newX = x - (zonePointSize - (imageWidth-x));
     end
     
-%StartSelectionBtn
+    
+function newY =checkY(y)
+    global zonePointSize;
+    global currentImageSize;
+    imageHeight = currentImageSize(1);
+    newY = y
+    if y < zonePointSize
+        newY = (zonePointSize - y) + y;
+    end
+    if y > imageHeight - zonePointSize
+        newY = y - (zonePointSize - (imageHeight-y));
+    end
+
+        
+function showPoints()
+    global IControlPoints;
+    n = size(IControlPoints(:,1));
+    axis on
+    hold on;
+    color = ['r','b'];
+    for i = 1:n
+        plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+    end
 
 % hObject    handle to StartSelectionBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
