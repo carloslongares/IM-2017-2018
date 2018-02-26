@@ -115,6 +115,8 @@ if FileName
     set(findobj('Tag','uitable2'), 'Enable', 'on');
     set(findobj('Tag','popupmenu1'), 'Enable', 'on');
     set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
+    %TODO: remove when network trains works fine.
+    set(findobj('Tag','pushbutton9'), 'Enable', 'on');
 end
 
     
@@ -145,6 +147,7 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 function pushbutton3_Callback(hObject, eventdata, handles)
 [FileName,PathName] = uigetfile('*.mat','Select network file');
 if FileName
+    disp 'a'
     set(findobj('Tag','pushbutton9'), 'Enable', 'on');
     set(findobj('Tag','pushbutton10'), 'Enable', 'on');
     set(findobj('Tag','pushbutton4'), 'Enable', 'on');
@@ -154,15 +157,21 @@ end
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
+global net;
 [file,path] = uiputfile('*.mat','Save network');
-
+save(strcat(path,"\",file),'net');
 
 % --- Executes on button press in pushbutton9.%TrainBTN
 function pushbutton9_Callback(hObject, eventdata, handles)
     global samples;
     global classes;
-%TODO: call trainCNN
+    global net;
+    %TODO: barajar muestras
     
+    [myNet,traininfo] = trainCNN(samples,classes);
+    net = myNet;
+    set(findobj('Tag','pushbutton4'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton10'), 'Enable', 'on');
     
 %TODO: Cambiar de sitio esto no debe ocurrir cuando se entrene a la red.
 %global IControlPoints;
@@ -171,7 +180,9 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in pushbutton10.
 function pushbutton10_Callback(hObject, eventdata, handles)
-
+global net;
+global images;
+%outputs = sim(net.Layers,images.imagenes);  
 
 
 % UIWAIT makes iDeep wait for user response (see UIRESUME)
@@ -197,8 +208,8 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
             for i =1:numberPoints
                if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
                 IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
-                samples = [samples;getPointsArround(x(i),y(i))];
-                classes = [classes;selectedClass];
+                samples = cat(4,samples,getPointsArround(x(i),y(i)));
+                classes = [classes,selectedClass];
                end
             end
             set(handles.uitable2,'data',IControlPoints);
@@ -213,9 +224,9 @@ function currentSample = getPointsArround(x,y)
     global currentImage;
     currentSample = zeros(32,32);
     n= 1;
-    for i=y-16:y+16
+    for i=y-16:y+15
         m = 1;
-        for j=x-16:x+16
+        for j=x-16:x+15
             currentSample(n,m)= images.imagenes(round(i),round(j),1);
             m=m+1;
         end
@@ -228,7 +239,7 @@ function newX =checkX(x)
     global zonePointSize;
     global currentImageSize;
     imageWidth = currentImageSize(2);
-    newX = x
+    newX = x;
     if x < zonePointSize
         newX = (zonePointSize - x) +x;
     end
@@ -241,7 +252,7 @@ function newY =checkY(y)
     global zonePointSize;
     global currentImageSize;
     imageHeight = currentImageSize(1);
-    newY = y
+    newY = y;
     if y < zonePointSize
         newY = (zonePointSize - y) + y;
     end

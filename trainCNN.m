@@ -1,4 +1,4 @@
-function [net]=trainCNN(X,T)
+function [net,traininfo]=trainCNN(X,T)
 
 % X=randn(32,32,1,5000);
 % T=categorical(randn(5000,1)>0.5);
