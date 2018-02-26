@@ -112,11 +112,14 @@ if FileName
     set(findobj('Tag','text2'), 'Enable', 'on');
     set(findobj('Tag','pushbutton2'), 'Enable', 'on');
     set(findobj('Tag','pushbutton3'), 'Enable', 'on');
+    set(findobj('Tag','pushbutton4'), 'Enable', 'on');
     set(findobj('Tag','uitable2'), 'Enable', 'on');
     set(findobj('Tag','popupmenu1'), 'Enable', 'on');
     set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
-    %TODO: remove when network trains works fine.
     set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+    
+    %TODO: remove when network trains works fine.
+    
 end
 
     
@@ -147,10 +150,11 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 function pushbutton3_Callback(hObject, eventdata, handles)
 [FileName,PathName] = uigetfile('*.mat','Select network file');
 if FileName
-    disp 'a'
-    set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+    %disp 'a'
     set(findobj('Tag','pushbutton10'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton4'), 'Enable', 'on');
+    set(findobj('Tag','text7'), 'Visible', 'on' );
+    set(findobj('Tag','text7'), 'String', 'Network ' + string(FileName) + ' loaded!' );
+    
     
 end
 
