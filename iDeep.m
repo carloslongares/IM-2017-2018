@@ -158,8 +158,6 @@ if FileName
     set(findobj('Tag','pushbutton10'), 'Enable', 'on');
     set(findobj('Tag','text7'), 'Visible', 'on' );
     set(findobj('Tag','text7'), 'String', 'Network ' + string(FileName) + ' loaded!' );
-    
-    
 end
 
 
@@ -190,7 +188,7 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 function pushbutton10_Callback(hObject, eventdata, handles)
 global net;
 global images;
-%test();
+test();
 %outputs = sim(net.Layers,images.imagenes);  
 
 
@@ -284,7 +282,6 @@ function test()
     global currentImage;
     global currentImageSize;
     global net;
-    net
     points = [];
     for i=1:currentImageSize(1)
         for j=1:currentImageSize(2)
