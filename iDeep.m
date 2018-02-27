@@ -285,10 +285,12 @@ function test()
     points = [];
     for i=1:currentImageSize(1)
         for j=1:currentImageSize(2)
-           points=[points;classify(net,getPointsArround(j,i))];
+           points=[points;i j grp2idx(classify(net,getPointsArround(j,i)))];
         end
     end
-    points
+    [file,path] = uiputfile('*.mat','Save points');
+    save(strcat(path,"\",file),'points');
+    %points
     
     
 % hObject    handle to StartSelectionBtn (see GCBO)
