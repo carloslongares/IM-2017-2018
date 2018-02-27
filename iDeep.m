@@ -145,9 +145,12 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
+global net;
 [FileName,PathName] = uigetfile('*.mat','Select network file');
 if FileName
-    disp 'a'
+    %TODO: change name of mynet
+    mynet=load(strcat(PathName,"\",FileName));
+    net=mynet.net;
     set(findobj('Tag','pushbutton9'), 'Enable', 'on');
     set(findobj('Tag','pushbutton10'), 'Enable', 'on');
     set(findobj('Tag','pushbutton4'), 'Enable', 'on');
@@ -182,6 +185,7 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 function pushbutton10_Callback(hObject, eventdata, handles)
 global net;
 global images;
+%test();
 %outputs = sim(net.Layers,images.imagenes);  
 
 
@@ -227,7 +231,7 @@ function currentSample = getPointsArround(x,y)
     for i=y-16:y+15
         m = 1;
         for j=x-16:x+15
-            currentSample(n,m)= images.imagenes(round(i),round(j),1);
+            currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
             m=m+1;
         end
     n=n+1;    
@@ -271,6 +275,20 @@ function showPoints()
         plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
     end
 
+function test()
+    global currentImage;
+    global currentImageSize;
+    global net;
+    net
+    points = [];
+    for i=1:currentImageSize(1)
+        for j=1:currentImageSize(2)
+           points=[points;classify(net,getPointsArround(j,i))];
+        end
+    end
+    points
+    
+    
 % hObject    handle to StartSelectionBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
