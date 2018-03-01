@@ -4,7 +4,9 @@ function [xr, yr] = shuffleRand4D(x,y)
 % xr -> 4 dimension array random row (poits shuffled)
 % yr -> 1 dimension array random row (class shuffled)
 
-r = randperm(size(x,1));
+r = randperm(size(x,4))
 
-xr = x(r,:,:,:);
-yr = y(r);
+xr = x(:,:,:,r);
+yr = y';
+yr = yr(r);
+yr = yr';
