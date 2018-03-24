@@ -138,6 +138,7 @@ if currentImage <= imagesNumber
     %Imagenes originales
     currentImageSize = size(images.imagenes(:,:,currentImage))
     imshow(images.imagenes(:,:,currentImage),[])
+    
 end
 
 
@@ -220,6 +221,8 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
         selectedClass = get(handles.popupmenu1,'Value');
         if numberPoints
             for i =1:numberPoints
+               % Esto es lo que me refiero, el 218 y 182. Estos numeros
+               % pùeden cambiar si se rota, vigilarlo...
                if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
                 IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
                 samples = cat(4,samples,getPointsArround(x(i),y(i)));
@@ -232,19 +235,29 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
     end
 
 function currentSample = getPointsArround(x,y)
-    x = checkX(x);
-    y = checkY(y);
     global images;
     global currentImage;
-    currentSample = zeros(32,32);
+    global currentImageSize;
+    
+    imageWidth = currentImageSize(2);
+    imageHeight = currentImageSize(1);
+    
+    currentSample = zeros(16,16);
     n= 1;
-    for i=y-16:y+15
+    for i=y-8:y+7
         m = 1;
-        for j=x-16:x+15
-            currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
+        for j=x-8:x+7
+            % Habria que cambiar el imageWith y imageHeigh por los limites
+            % que hemos usado mienstras cogemos los puntos (arriba indicado)
+            if (i<1 || j<1 || i>imageWidth || j>imageHeight)
+             currentSample(n,m)=0;
+            else
+             currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
+            end
             m=m+1;
         end
-    n=n+1;    
+    n=n+1; 
+    assignin('base','samp',currentSample);
     end
  
 
