@@ -207,6 +207,7 @@ test();
 % --- Executes on button press in StartSelectionBtn.
 function StartSelectionBtn_Callback(hObject, eventdata, handles)
     global IControlPoints
+    global currentImageSize;
     global samples;
     global classes;
     if get(hObject,'Value')
@@ -221,9 +222,7 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
         selectedClass = get(handles.popupmenu1,'Value');
         if numberPoints
             for i =1:numberPoints
-               % Esto es lo que me refiero, el 218 y 182. Estos numeros
-               % pùeden cambiar si se rota, vigilarlo...
-               if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
+               if (x(i) >= 0) && (x(i) <= currentImageSize(1)) && (0 <= y(i)) && (y(i) <= currentImageSize(2))
                 IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
                 samples = cat(4,samples,getPointsArround(x(i),y(i)));
                 classes = [classes,selectedClass];
@@ -258,13 +257,16 @@ function currentSample = getPointsArround(x,y)
         
 function showPoints()
     global IControlPoints;
-    n = size(IControlPoints(:,1));
-    axis on
-    hold on;
-    color = ['r','b'];
-    for i = 1:n
-        plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+    if not(isempty(IControlPoints))
+       n = size(IControlPoints(:,1));
+       axis on
+       hold on;
+       color = ['r','b'];
+       for i = 1:n
+         plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+       end
     end
+ 
 
 function test()
     global currentImage;

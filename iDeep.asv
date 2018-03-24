@@ -137,8 +137,8 @@ if currentImage <= imagesNumber
 
     %Imagenes originales
     currentImageSize = size(images.imagenes(:,:,currentImage))
-    imshow(images.imagenes(:,:,currentImage),[])
-    
+    h = imrotate(images.imagenes(:,:,currentImage),90);
+    imshow(h,[]);
 end
 
 
@@ -207,6 +207,7 @@ test();
 % --- Executes on button press in StartSelectionBtn.
 function StartSelectionBtn_Callback(hObject, eventdata, handles)
     global IControlPoints
+    global currentImageSize;
     global samples;
     global classes;
     if get(hObject,'Value')
@@ -223,7 +224,10 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
             for i =1:numberPoints
                % Esto es lo que me refiero, el 218 y 182. Estos numeros
                % pùeden cambiar si se rota, vigilarlo...
-               if (x(i) >= 0) && (x(i) <= 218) && (0 <= y(i)) && (y(i) <= 182)
+              if x(i) <= currentImageSize(1)
+                  disp 'ola'
+              end
+               if (x(i) >= 0) && (x(i) <= currentImageSize(1)) && (0 <= y(i)) && (y(i) <= currentImageSize(2))
                 IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
                 samples = cat(4,samples,getPointsArround(x(i),y(i)));
                 classes = [classes,selectedClass];
@@ -237,11 +241,7 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
 function currentSample = getPointsArround(x,y)
     global images;
     global currentImage;
-    global currentImageSize;
     global zonePointSize;
-
-    imageWidth = currentImageSize(2);
-    imageHeight = currentImageSize(1);
     
     currentSample = zeros(zonePointSize,zonePointSize);
     radiusArea = zonePointSize/2;
@@ -249,15 +249,9 @@ function currentSample = getPointsArround(x,y)
     for i=y-radiusArea:y+radiusArea-1
         m = 1;
         for j=x-radiusArea:x+radiusArea-1
-            % Habria que cambiar el imageWith y imageHeigh por los limites
-            % que hemos usado mienstras cogemos los puntos (arriba indicado)
-            %if (i<1 || j<1 || i>imageWidth || j>imageHeight)
-             %currentSample(n,m)=0;
-            %else
             try
-                currentSample(n,m)= images.imagenes(round(i),round(j),currentImage)
+                currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
             end
-            %end
             m=m+1;
         end
         n=n+1; 
@@ -265,42 +259,19 @@ function currentSample = getPointsArround(x,y)
     end
  
 
-
-function newX =checkX(x)
-    global zonePointSize;
-    global currentImageSize;
-    imageWidth = currentImageSize(2);
-    newX = x;
-    if x < zonePointSize
-        newX = (zonePointSize - x) +x;
-    end
-    if x > imageWidth - zonePointSize
-        newX = x - (zonePointSize - (imageWidth-x));
-    end
-    
-    
-function newY =checkY(y)
-    global zonePointSize;
-    global currentImageSize;
-    imageHeight = currentImageSize(1);
-    newY = y;
-    if y < zonePointSize
-        newY = (zonePointSize - y) + y;
-    end
-    if y > imageHeight - zonePointSize
-        newY = y - (zonePointSize - (imageHeight-y));
-    end
-
         
 function showPoints()
     global IControlPoints;
-    n = size(IControlPoints(:,1));
-    axis on
-    hold on;
-    color = ['r','b'];
-    for i = 1:n
-        plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+    if not(isempty(IControlPoints)
+       n = size(IControlPoints(:,1));
+       axis on
+       hold on;
+       color = ['r','b'];
+       for i = 1:n
+         plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+       end
     end
+ 
 
 function test()
     global currentImage;
