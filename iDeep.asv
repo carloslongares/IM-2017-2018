@@ -137,8 +137,8 @@ if currentImage <= imagesNumber
 
     %Imagenes originales
     currentImageSize = size(images.imagenes(:,:,currentImage))
-    h = imrotate(images.imagenes(:,:,currentImage),90);
-    imshow(h,[]);
+    imshow(images.imagenes(:,:,currentImage),[])
+    
 end
 
 
@@ -237,7 +237,11 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
 function currentSample = getPointsArround(x,y)
     global images;
     global currentImage;
+    global currentImageSize;
     global zonePointSize;
+
+    imageWidth = currentImageSize(2);
+    imageHeight = currentImageSize(1);
     
     currentSample = zeros(zonePointSize,zonePointSize);
     radiusArea = zonePointSize/2;
@@ -245,15 +249,47 @@ function currentSample = getPointsArround(x,y)
     for i=y-radiusArea:y+radiusArea-1
         m = 1;
         for j=x-radiusArea:x+radiusArea-1
+            % Habria que cambiar el imageWith y imageHeigh por los limites
+            % que hemos usado mienstras cogemos los puntos (arriba indicado)
+            %if (i<1 || j<1 || i>imageWidth || j>imageHeight)
+             %currentSample(n,m)=0;
+            %else
             try
-                currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
+                currentSample(n,m)= images.imagenes(round(i),round(j),currentImage)
             end
+            %end
             m=m+1;
         end
         n=n+1; 
         assignin('base','samp',currentSample);
     end
  
+
+
+function newX =checkX(x)
+    global zonePointSize;
+    global currentImageSize;
+    imageWidth = currentImageSize(2);
+    newX = x;
+    if x < zonePointSize
+        newX = (zonePointSize - x) +x;
+    end
+    if x > imageWidth - zonePointSize
+        newX = x - (zonePointSize - (imageWidth-x));
+    end
+    
+    
+function newY =checkY(y)
+    global zonePointSize;
+    global currentImageSize;
+    imageHeight = currentImageSize(1);
+    newY = y;
+    if y < zonePointSize
+        newY = (zonePointSize - y) + y;
+    end
+    if y > imageHeight - zonePointSize
+        newY = y - (zonePointSize - (imageHeight-y));
+    end
 
         
 function showPoints()
