@@ -130,6 +130,8 @@ global images
 global currentImage
 global imagesNumber;
 global currentImageSize;
+global IControlPoints;
+
 currentImage = currentImage+1;
 if currentImage <= imagesNumber
     %Mascaras (como deberia quedar la imagen al ser 'recortada')
@@ -139,8 +141,16 @@ if currentImage <= imagesNumber
     currentImageSize = size(images.imagenes(:,:,currentImage))
     h = imrotate(images.imagenes(:,:,currentImage),90);
     imshow(h,[]);
+    %showMask()
 end
 
+function showMask()
+    [FileName,PathName] = uigetfile('*.mat','Points');
+	if FileName
+        data=load(strcat(PathName,"\",FileName));
+        IControlPoints= data.points;
+        showPoints();
+    end
 
     
 % --- Executes on button press in pushbutton2.
@@ -173,14 +183,8 @@ function pushbutton9_Callback(hObject, eventdata, handles)
     global samples;
     global classes;
     global net;
-    %TODO: barajar muestras
-    size(samples)
-    size(classes)
+
     [samples2,classes2]=shuffleRand4D(samples,classes);
-    
-    size(samples2)
-    size(classes2)
-   
     
     [myNet,traininfo] = trainCNN(samples2,classes2);
     net = myNet;
