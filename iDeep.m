@@ -64,7 +64,7 @@ currentImage = 0;
 global currentImageSize;
 currentImageSize = 0;
 global zonePointSize;
-zonePointSize = 32;
+zonePointSize = 16;
 global classes;
 classes = [];
 
@@ -141,10 +141,11 @@ if currentImage <= imagesNumber
     currentImageSize = size(images.imagenes(:,:,currentImage))
     h = imrotate(images.imagenes(:,:,currentImage),90);
     imshow(h,[]);
-    %showMask()
+    showMask()
 end
 
 function showMask()
+    global IControlPoints;
     [FileName,PathName] = uigetfile('*.mat','Points');
 	if FileName
         data=load(strcat(PathName,"\",FileName));

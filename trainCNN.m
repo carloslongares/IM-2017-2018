@@ -33,7 +33,7 @@ layers = [imageInputLayer([s1(1) s1(2) 1]);
           softmaxLayer();
           classificationLayer()];
       
-options = trainingOptions('sgdm','MaxEpochs',150,'InitialLearnRate',0.01,'ExecutionEnvironment','gpu');
+options = trainingOptions('sgdm','MaxEpochs',200,'InitialLearnRate',0.01,'ExecutionEnvironment','gpu');
 rng('default') % For reproducibility      
 [net,traininfo] = trainNetwork(X,categorical(single(T)),layers,options);
 
