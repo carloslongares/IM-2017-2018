@@ -273,10 +273,8 @@ function test()
            points=[points;i j grp2idx(classify(net,getPointsArround(j,i)))];
         end
     end
-    tic
     [imageOv] =  showOverlapPoints(points,images.imagenes(:,:,currentImage),5);
-    toc 
-    h = imrotate(imageOv,90);
+     h = imrotate(imageOv,90);
     imshow(h,[]);
     %[file,path] = uiputfile('*.mat','Save points');
     %save(strcat(path,"\",file),'points');
