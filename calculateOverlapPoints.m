@@ -1,4 +1,4 @@
-function [imageOv] =  showOverlapPoints(IControlPoints,image,intensity)
+function [imageOv,binaryMask] =  calculateOverlapPoints(IControlPoints,image,intensity)
 %How to use it
 
 % IControlPoints -> Points
@@ -13,7 +13,7 @@ function [imageOv] =  showOverlapPoints(IControlPoints,image,intensity)
     image_d = double(image);
     
     image_rgb = zeros(nx,ny,3)+255;
-    
+    binaryMask = zeros(nx,ny,3);
     
     for fx = 1:nx
         for fy = 1:ny
@@ -21,7 +21,7 @@ function [imageOv] =  showOverlapPoints(IControlPoints,image,intensity)
             
              
              if class==1.0
-                 
+             binaryMask(fx,fy) = 1;
              image_rgb(fx,fy,1) = (4/max(image_d(fx,fy,1)))/2 + image_d(fx,fy,1)/(100*intensity) ;
              image_rgb(fx,fy,2) = (1/max(image_d(fx,fy,1)))/10 + image_d(fx,fy,1)/850 ;
              image_rgb(fx,fy,3) = (1/max(image_d(fx,fy,1)))/10 + image_d(fx,fy,1)/850 ;

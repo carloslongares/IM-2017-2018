@@ -22,7 +22,7 @@ function varargout = iDeep(varargin)
 
 % Edit the above text to modify the response to help iDeep
 
-% Last Modified by GUIDE v2.5 15-Feb-2018 18:05:23
+% Last Modified by GUIDE v2.5 03-Apr-2018 20:41:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -66,10 +66,13 @@ global currentImageIndex;
 currentImageIndex = 0;
 
 global currentImage;
-currentImage = 0;
+currentImage = [];
 
 global currentImageSize;
 currentImageSize = 0;
+
+global currentImageMask;
+currentImageMask = [];
 
 global zonePointSize;
 zonePointSize = 16;
@@ -77,8 +80,10 @@ zonePointSize = 16;
 global classes;
 classes = [];
 
+global dice;
+dice = 0;
 %CONFIGURACIONES INICIALES DE LOS ELEMENTOS DE LA GUI
-set(handles.uitable2,'Data',cell(0,3));
+%set(handles.uitable2,'Data',cell(0,3));
 
 
 % --- Outputs from this function are returned to the command line.
@@ -106,10 +111,13 @@ function popupmenu1_CreateFcn(hObject, eventdata, handles)
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
     global images;
+    global masks;
     global imagesNumber;
     [FileName,PathName] = uigetfile('*.mat','Select image');
+    [FileNameMask,PathNameMask] = uigetfile('*.mat','Select mask image');
     if FileName
         images = load(strcat(PathName,"\",FileName));
+        masks = load(strcat(PathNameMask,"\",FileNameMask));
         n = size(images.imagenes);
         imagesNumber = n(3);
         showNextImage();
@@ -128,18 +136,21 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 
 function showNextImage()
     global images;
+    global masks;
     global currentImageIndex;
     global imagesNumber;
     global currentImageSize;
     global currentImage;
- 
+    global currentImageMask;
+    
     currentImageIndex = currentImageIndex+1;
     if currentImageIndex <= imagesNumber
-        %Mascaras (como deberia quedar la imagen al ser 'recortada')
-        %imshow(images.mascaras(:,:,n),[])
-
         %Imagenes originales
         currentImage = imrotate(images.imagenes(:,:,currentImageIndex),90);
+        
+        %Mascaras de imagenes
+        currentImageMask = imrotate(masks.mascaras(:,:,currentImageIndex),90);
+        
         currentImageSize = size(currentImage);
         imshow(currentImage,[]);
     end
@@ -212,7 +223,7 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
                 classes = [classes;selectedClass];
                end
             end
-            set(handles.uitable2,'data',IControlPoints);
+            %set(handles.uitable2,'data',IControlPoints);
         end
         showPoints();
     end
@@ -262,13 +273,13 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 
 
 function test()
-    global currentImageIndex;
     global currentImage;
-    global images;
+    global currentImageMask;
+    global dice;
     points = segment();
-    [imageOv] =  showOverlapPoints(points,currentImage,5);
+    [imageOv,binaryMask] =  calculateOverlapPoints(points,currentImage,5);
     imshow(imageOv,[]);
-
+    dice = 2*nnz(binaryMask&currentImageMask)/(nnz(binaryMask) + nnz(currentImageMask));
 
 function [points] = segment()
     global zonePointSize;
@@ -341,4 +352,11 @@ function minitest()
         B = points == IControlPoints;
         errors = sum(B(:,3) == 0)
     end
+
+
+% --- Executes on button press in pushbuttonDiceStatistics.
+function pushbuttonDiceStatistics_Callback(hObject, eventdata, handles)
+global dice;
+%TODO: show dice coefficient on a dialog and not in console
+dice
 
