@@ -329,16 +329,16 @@ function [points] = segment()
     
 
 function minitest()
-    global net;
     global IControlPoints;
-    sizeControlPoints = size(IControlPoints);
-    points = [];
-    for i=1:sizeControlPoints(1)
-        points=[points;IControlPoints(i,1) IControlPoints(i,2) grp2idx(classify(net,getPointsArround(IControlPoints(i,1),IControlPoints(i,2))))];
-        %points = cat(4,points,getPointsArround(IControlPoints(i,1),IControlPoints(i,2)));
+    if not(isempty(IControlPoints))
+        global net;
+        sizeControlPoints = size(IControlPoints);
+        points = [];
+        for i=1:sizeControlPoints(1)
+            points=[points;IControlPoints(i,1) IControlPoints(i,2) grp2idx(classify(net,getPointsArround(IControlPoints(i,1),IControlPoints(i,2))))];
+            %points = cat(4,points,getPointsArround(IControlPoints(i,1),IControlPoints(i,2)));
+        end
+        B = points == IControlPoints;
+        errors = sum(B(:,3) == 0)
     end
-    B = points == IControlPoints;
-    errors = sum(B(:,3) == 0)
-
-
 
