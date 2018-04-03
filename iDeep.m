@@ -55,16 +55,25 @@ guidata(hObject, handles);
 % INICIALIZACION VARIABLE GLOBALES
 global IControlPoints;
 IControlPoints = [];
+
 global samples;
 samples = [];
+
 global imagesNumber;
 imagesNumber = 0;
+
+global currentImageIndex;
+currentImageIndex = 0;
+
 global currentImage;
 currentImage = 0;
+
 global currentImageSize;
 currentImageSize = 0;
+
 global zonePointSize;
 zonePointSize = 16;
+
 global classes;
 classes = [];
 
@@ -85,88 +94,79 @@ varargout{1} = handles.output;
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
 
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
 
 
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
-global images;
-global imagesNumber;
-[FileName,PathName] = uigetfile('*.mat','Select image');
-if FileName
-    images = load(strcat(PathName,"\",FileName));
-    n = size(images.imagenes);
-    imagesNumber = n(3);
-    showNextImage();
-    %%%%%%%%%%%%%
-    set(findobj('Tag','text2'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton2'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton3'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton4'), 'Enable', 'on');
-    set(findobj('Tag','uitable2'), 'Enable', 'on');
-    set(findobj('Tag','popupmenu1'), 'Enable', 'on');
-    set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton9'), 'Enable', 'on');
-    
-    %TODO: remove when network trains works fine.
-    
-end
+    global images;
+    global imagesNumber;
+    [FileName,PathName] = uigetfile('*.mat','Select image');
+    if FileName
+        images = load(strcat(PathName,"\",FileName));
+        n = size(images.imagenes);
+        imagesNumber = n(3);
+        showNextImage();
+     
+        set(findobj('Tag','text2'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton2'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton3'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton4'), 'Enable', 'on');
+        set(findobj('Tag','uitable2'), 'Enable', 'on');
+        set(findobj('Tag','popupmenu1'), 'Enable', 'on');
+        set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+    end
 
     
-%shows the number imgNumber image of the images loaded if the images loaded
-%are only one then imgNumber havea to be 1.
+
 function showNextImage()
-global images
-global currentImage
-global imagesNumber;
-global currentImageSize;
-global IControlPoints;
+    global images;
+    global currentImageIndex;
+    global imagesNumber;
+    global currentImageSize;
+    global currentImage;
+ 
+    currentImageIndex = currentImageIndex+1;
+    if currentImageIndex <= imagesNumber
+        %Mascaras (como deberia quedar la imagen al ser 'recortada')
+        %imshow(images.mascaras(:,:,n),[])
 
-currentImage = currentImage+1;
-if currentImage <= imagesNumber
-    %Mascaras (como deberia quedar la imagen al ser 'recortada')
-    %imshow(images.mascaras(:,:,n),[])
+        %Imagenes originales
+        currentImage = imrotate(images.imagenes(:,:,currentImageIndex),90);
+        currentImageSize = size(currentImage);
+        imshow(currentImage,[]);
+    end
 
-    %Imagenes originales
-    currentImageSize = size(images.imagenes(:,:,currentImage))
-    h = imrotate(images.imagenes(:,:,currentImage),90);
-    imshow(h,[]);
-end
-    
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
-[file,path] = uiputfile('*.mat','Save file name');
+    [file,path] = uiputfile('*.mat','Save file name');
 
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
-global net;
-[FileName,PathName] = uigetfile('*.mat','Select network file');
-if FileName
-    %TODO: change name of mynet
-    mynet=load(strcat(PathName,"\",FileName));
-    net=mynet.net;
-    set(findobj('Tag','pushbutton9'), 'Enable', 'on');
-    set(findobj('Tag','pushbutton10'), 'Enable', 'on');
-    set(findobj('Tag','text7'), 'Visible', 'on' );
-    set(findobj('Tag','text7'), 'String', 'Network ' + string(FileName) + ' loaded!' );
-end
+    global net;
+    [FileName,PathName] = uigetfile('*.mat','Select network file');
+    if FileName
+        data=load(strcat(PathName,"\",FileName));
+        net=data.net;
+        set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton10'), 'Enable', 'on');
+        set(findobj('Tag','text7'), 'Visible', 'on' );
+        set(findobj('Tag','text7'), 'String', 'Network ' + string(FileName) + ' loaded!' );
+    end
 
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
-global net;
-[file,path] = uiputfile('*.mat','Save network');
-save(strcat(path,"\",file),'net');
+    global net;
+    [file,path] = uiputfile('*.mat','Save network');
+    save(strcat(path,"\",file),'net');
 
 % --- Executes on button press in pushbutton9.%TrainBTN
 function pushbutton9_Callback(hObject, eventdata, handles)
@@ -186,16 +186,6 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 %IControlPoints = [];%Remove points of prev. images.
 %set(findobj('Tag','uitable2'), 'Data', {})%Clear UI Table uitable2
 
-% --- Executes on button press in pushbutton10.
-function pushbutton10_Callback(hObject, eventdata, handles)
-global net;
-global images;
-test();
-%outputs = sim(net.Layers,images.imagenes);  
-
-
-% UIWAIT makes iDeep wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
 
 
 % --- Executes on button press in StartSelectionBtn.
@@ -216,10 +206,10 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
         selectedClass = get(handles.popupmenu1,'Value');
         if numberPoints
             for i =1:numberPoints
-               if (x(i) >= 0) && (x(i) <= currentImageSize(1)) && (0 <= y(i)) && (y(i) <= currentImageSize(2))
+               if (x(i) >= 0) && (x(i) <= currentImageSize(2)) && (0 <= y(i)) && (y(i) <= currentImageSize(1))
                 IControlPoints = [IControlPoints;x(i),y(i),selectedClass];
                 samples = cat(4,samples,getPointsArround(x(i),y(i)));
-                classes = [classes,selectedClass];
+                classes = [classes;selectedClass];
                end
             end
             set(handles.uitable2,'data',IControlPoints);
@@ -239,7 +229,7 @@ function currentSample = getPointsArround(x,y)
         m = 1;
         for j=x-radiusArea:x+radiusArea-1
             try
-                currentSample(n,m)= images.imagenes(round(i),round(j),currentImage);
+                currentSample(n,m)= currentImage(round(i),round(j));
             end
             m=m+1;
         end
@@ -261,28 +251,94 @@ function showPoints()
        end
     end
  
+    
+    % --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+    tic
+    test();
+    t = toc
+    minitest();
+
+
 
 function test()
+    global currentImageIndex;
     global currentImage;
-    global currentImageSize;
-    global net;
     global images;
+    points = segment();
+    [imageOv] =  showOverlapPoints(points,currentImage,5);
+    imshow(imageOv,[]);
+
+
+function [points] = segment()
+    global zonePointSize;
+    global currentImageSize;
+    global currentImage;
+    global net;
+    global IControlPoints;
+    
+    sampleSet = [];
     points = [];
+    radius = zonePointSize/2;
+    jstart = radius+1;
+    f = waitbar(0,'Tessting');
+    firstOfTheRow = getPointsArround(1 , 1);
+  
     for i=1:currentImageSize(1)
-        for j=1:currentImageSize(2)
-           points=[points;i j grp2idx(classify(net,getPointsArround(j,i)))];
+        currentSample= firstOfTheRow;
+        sampleRow=[currentSample];
+        s = 1;
+        points = [points;i s];
+        s= s+1;
+        for j=jstart:currentImageSize(2)+radius -1
+            currentSample(:,1) = [];
+            nextColumn = zeros(zonePointSize,1);
+            points = [points;i s];
+            s= s+1;
+            n=1;
+            for z=i-radius :i+(radius )-1
+                try
+                    nextColumn(n) = currentImage(z,j+1);
+                end
+                n = n+1;
+            end
+            currentSample = [currentSample nextColumn];
+            sampleRow = cat(4,sampleRow,currentSample);
         end
+        sampleSet =  cat(4,sampleSet,sampleRow);
+        
+        firstOfTheRow(1,:) = [];
+        nextRow= zeros(1,zonePointSize);
+        n=1;
+        for z=1-radius :1+(radius )-1
+            try
+                nextRow(n) = currentImage(i+1,z);
+            end
+            n = n+1;
+        end
+        firstOfTheRow = [firstOfTheRow; nextRow];
+        
+        waitbar(i/currentImageSize(1));
     end
-    tic
-    [imageOv] =  showOverlapPoints(points,images.imagenes(:,:,currentImage),5);
-    toc 
-    h = imrotate(imageOv,90);
-    imshow(h,[]);
-    %[file,path] = uiputfile('*.mat','Save points');
-    %save(strcat(path,"\",file),'points');
-    %points
     
+    labels = grp2idx(classify(net,sampleSet));
+    points =[points labels];
+    close(f);
     
-% hObject    handle to StartSelectionBtn (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+  
+    
+
+function minitest()
+    global net;
+    global IControlPoints;
+    sizeControlPoints = size(IControlPoints);
+    points = [];
+    for i=1:sizeControlPoints(1)
+        points=[points;IControlPoints(i,1) IControlPoints(i,2) grp2idx(classify(net,getPointsArround(IControlPoints(i,1),IControlPoints(i,2))))];
+        %points = cat(4,points,getPointsArround(IControlPoints(i,1),IControlPoints(i,2)));
+    end
+    B = points == IControlPoints;
+    errors = sum(B(:,3) == 0)
+
+
+

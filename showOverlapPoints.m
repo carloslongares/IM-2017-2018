@@ -42,8 +42,5 @@ function [imageOv] =  showOverlapPoints(IControlPoints,image,intensity)
     
      
      imageOv = image_rgb;  
-     
-     colormap(gray);
-     imagesc(imageOv);
-       
+
     
