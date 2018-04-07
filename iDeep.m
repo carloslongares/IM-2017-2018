@@ -22,7 +22,7 @@ function varargout = iDeep(varargin)
 
 % Edit the above text to modify the response to help iDeep
 
-% Last Modified by GUIDE v2.5 03-Apr-2018 20:41:19
+% Last Modified by GUIDE v2.5 07-Apr-2018 13:04:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -82,6 +82,11 @@ classes = [];
 
 global dice;
 dice = 0;
+
+global shPoints;
+shPoints = [];
+global isToggleshPoints;
+isToggleshPoints = 1;
 %CONFIGURACIONES INICIALES DE LOS ELEMENTOS DE LA GUI
 %set(handles.uitable2,'Data',cell(0,3));
 
@@ -252,14 +257,23 @@ function currentSample = getPointsArround(x,y)
         
 function showPoints()
     global IControlPoints;
+    global shPoints;
+    global isToggleshPoints;
+    if isToggleshPoints == 0
+        togglePoints;
+    end
+    
     if not(isempty(IControlPoints))
-       n = size(IControlPoints(:,1));
+       n = size(IControlPoints(:,1),1);
+       togglePoints;
+       shPoints = zeros(1,n);
        axis on
        hold on;
        color = ['r','b'];
        for i = 1:n
-         plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
+         shPoints(i) = plot(IControlPoints(i,1),IControlPoints(i,2), strcat(color(IControlPoints(i,3)),'+'), 'MarkerSize', 7, 'LineWidth', 1);
        end
+       togglePoints;
     end
  
     
@@ -357,6 +371,57 @@ function minitest()
 % --- Executes on button press in pushbuttonDiceStatistics.
 function pushbuttonDiceStatistics_Callback(hObject, eventdata, handles)
 global dice;
+%msgdlg( );
 %TODO: show dice coefficient on a dialog and not in console
+msgbox(sprintf('Dice value is: %f', dice));
 dice
 
+
+% --- Executes on button press in togglePoints.
+function togglePoints_Callback(hObject, eventdata, handles)
+global isToggleshPoints;
+global shPoints;
+size(shPoints,2)
+
+    if isToggleshPoints == 1
+        for i=1:size(shPoints,2)
+        set(shPoints(i),'Visible','off')
+        end
+        isToggleshPoints = 0;
+        
+    else
+        for i=1:size(shPoints,2)
+        set(shPoints(i),'Visible','on')
+        end
+        isToggleshPoints = 1;
+    end
+
+    
+function togglePoints
+global isToggleshPoints;
+global shPoints;
+size(shPoints,2)
+
+    if isToggleshPoints == 1
+        for i=1:size(shPoints,2)
+        set(shPoints(i),'Visible','off')
+        end
+        isToggleshPoints = 0;
+        
+    else
+        for i=1:size(shPoints,2)
+        set(shPoints(i),'Visible','on')
+        end
+        isToggleshPoints = 1;
+    end
+
+    
+
+% --- Executes on key press with focus on togglePoints and none of its controls.
+function togglePoints_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to togglePoints (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
