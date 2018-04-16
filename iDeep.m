@@ -220,8 +220,10 @@ function pushbutton9_Callback(hObject, eventdata, handles)
         [samples2,classes2]=shuffleRand4D(samples,classes);
     end
 
-        [myNet,traininfo] = trainCNN(samples2,classes2);
- 
+    dialog = displayLoading('training network ...','Loading');
+    [myNet,traininfo] = trainCNN(samples2,classes2);
+    deleteDialog(dialog);
+    
     net = myNet;
 
     set(findobj('Tag','pushbutton4'), 'Enable', 'on');
