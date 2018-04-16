@@ -185,10 +185,14 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
     global net;
+    global samples;
+    global classes;
     [FileName,PathName] = uigetfile('*.mat','Select network file');
     if FileName
         data=load(strcat(PathName,"\",FileName));
         net=data.net;
+        samples = data.samples;
+        classes = data.classes;
         set(findobj('Tag','pushbutton9'), 'Enable', 'on');
         set(findobj('Tag','pushbutton10'), 'Enable', 'on');
         set(findobj('Tag','text7'), 'Visible', 'on' );
@@ -215,8 +219,7 @@ function pushbutton9_Callback(hObject, eventdata, handles)
     if not(isempty(samples))
         [samples2,classes2]=shuffleRand4D(samples,classes);
     end
-    
-     
+
         [myNet,traininfo] = trainCNN(samples2,classes2);
  
     net = myNet;
@@ -425,13 +428,18 @@ function togglePoints()
 
 % --- Executes on button press in pushbutton16.
 function pushbutton16_Callback(hObject, eventdata, handles)
+    global IControlPoints;
+    IControlPoints = [];
     showNextImage();
 
 
 % --- Executes on button press in pushbutton17.
 function pushbutton17_Callback(hObject, eventdata, handles)
     global currentImageIndex;
+    global IControlPoints;
+    
     if currentImageIndex > 1
+        IControlPoints = [];
         currentImageIndex = currentImageIndex-2;
         showNextImage();
     end
