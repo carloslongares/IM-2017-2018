@@ -22,7 +22,7 @@ function varargout = iDeep(varargin)
 
 % Edit the above text to modify the response to help iDeep
 
-% Last Modified by GUIDE v2.5 07-Apr-2018 13:04:51
+% Last Modified by GUIDE v2.5 16-Apr-2018 15:30:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,6 +53,9 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % INICIALIZACION VARIABLE GLOBALES
+global net;
+net = [];
+
 global IControlPoints;
 IControlPoints = [];
 
@@ -81,14 +84,18 @@ global classes;
 classes = [];
 
 global dice;
-dice = 0;
+dice = [];
 
 global shPoints;
 shPoints = [];
+
 global isToggleshPoints;
 isToggleshPoints = 1;
-%CONFIGURACIONES INICIALES DE LOS ELEMENTOS DE LA GUI
-%set(handles.uitable2,'Data',cell(0,3));
+
+global numPoints;
+numPoints = [];
+
+
 
 
 % --- Outputs from this function are returned to the command line.
@@ -106,12 +113,17 @@ varargout{1} = handles.output;
 function popupmenu1_Callback(hObject, eventdata, handles)
 
 
+
+
+
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 
+    
+    
 
 % --- Executes on load image button.
 function pushbutton1_Callback(hObject, eventdata, handles)
@@ -131,6 +143,8 @@ function pushbutton1_Callback(hObject, eventdata, handles)
         set(findobj('Tag','pushbutton2'), 'Enable', 'on');
         set(findobj('Tag','pushbutton3'), 'Enable', 'on');
         set(findobj('Tag','pushbutton4'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton16'), 'Enable', 'on');
+        set(findobj('Tag','pushbutton17'), 'Enable', 'on');
         set(findobj('Tag','uitable2'), 'Enable', 'on');
         set(findobj('Tag','popupmenu1'), 'Enable', 'on');
         set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
@@ -160,10 +174,14 @@ function showNextImage()
         imshow(currentImage,[]);
     end
 
+    
+    
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
     [file,path] = uiputfile('*.mat','Save file name');
 
+    
+    
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
     global net;
@@ -181,19 +199,28 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
     global net;
+    global samples;
+    global classes;
+    
     [file,path] = uiputfile('*.mat','Save network');
-    save(strcat(path,"\",file),'net');
+    save(strcat(path,"\",file),'net','samples','classes');
 
+    
 % --- Executes on button press in pushbutton9.%TrainBTN
 function pushbutton9_Callback(hObject, eventdata, handles)
     global samples;
     global classes;
     global net;
 
-    [samples2,classes2]=shuffleRand4D(samples,classes);
+    if not(isempty(samples))
+        [samples2,classes2]=shuffleRand4D(samples,classes);
+    end
     
-    [myNet,traininfo] = trainCNN(samples2,classes2);
+     
+        [myNet,traininfo] = trainCNN(samples2,classes2);
+ 
     net = myNet;
+
     set(findobj('Tag','pushbutton4'), 'Enable', 'on');
     set(findobj('Tag','pushbutton10'), 'Enable', 'on');
     
@@ -233,6 +260,7 @@ function StartSelectionBtn_Callback(hObject, eventdata, handles)
         showPoints();
     end
 
+    
 function currentSample = getPointsArround(x,y)
     global images;
     global currentImage;
@@ -259,6 +287,7 @@ function showPoints()
     global IControlPoints;
     global shPoints;
     global isToggleshPoints;
+    
     if isToggleshPoints == 0
         togglePoints;
     end
@@ -282,19 +311,24 @@ function pushbutton10_Callback(hObject, eventdata, handles)
     tic
     test();
     t = toc
-    minitest();
-
+ 
 
 
 function test()
     global currentImage;
     global currentImageMask;
     global dice;
+    global numPoints;
+    global IControlPoints;
+        
     points = segment();
     [imageOv,binaryMask] =  calculateOverlapPoints(points,currentImage,5);
     imshow(imageOv,[]);
-    dice = 2*nnz(binaryMask&currentImageMask)/(nnz(binaryMask) + nnz(currentImageMask));
-
+    showPoints();
+    dice = [dice 2*nnz(binaryMask&currentImageMask)/(nnz(binaryMask) + nnz(currentImageMask));]
+    sizePoints = size(IControlPoints);
+    numPoints = [numPoints sizePoints(1)];
+    
 function [points] = segment()
     global zonePointSize;
     global currentImageSize;
@@ -352,76 +386,55 @@ function [points] = segment()
     
   
     
-
-function minitest()
-    global IControlPoints;
-    if not(isempty(IControlPoints))
-        global net;
-        sizeControlPoints = size(IControlPoints);
-        points = [];
-        for i=1:sizeControlPoints(1)
-            points=[points;IControlPoints(i,1) IControlPoints(i,2) grp2idx(classify(net,getPointsArround(IControlPoints(i,1),IControlPoints(i,2))))];
-            %points = cat(4,points,getPointsArround(IControlPoints(i,1),IControlPoints(i,2)));
-        end
-        B = points == IControlPoints;
-        errors = sum(B(:,3) == 0)
-    end
-
-
 % --- Executes on button press in pushbuttonDiceStatistics.
 function pushbuttonDiceStatistics_Callback(hObject, eventdata, handles)
-global dice;
-%msgdlg( );
-%TODO: show dice coefficient on a dialog and not in console
-msgbox(sprintf('Dice value is: %f', dice));
-dice
+    global dice;
+    global numPoints;
+    
+    figure;
+    plot(numPoints,dice,'.-');
+   
+
+    %msgbox(sprintf('Dice value is: %f', dice));
+
 
 
 % --- Executes on button press in togglePoints.
 function togglePoints_Callback(hObject, eventdata, handles)
-global isToggleshPoints;
-global shPoints;
-size(shPoints,2)
-
-    if isToggleshPoints == 1
-        for i=1:size(shPoints,2)
-        set(shPoints(i),'Visible','off')
-        end
-        isToggleshPoints = 0;
-        
-    else
-        for i=1:size(shPoints,2)
-        set(shPoints(i),'Visible','on')
-        end
-        isToggleshPoints = 1;
-    end
-
+    togglePoints();
     
-function togglePoints
-global isToggleshPoints;
-global shPoints;
-size(shPoints,2)
+function togglePoints()
+    global isToggleshPoints;
+    global shPoints;
 
-    if isToggleshPoints == 1
-        for i=1:size(shPoints,2)
-        set(shPoints(i),'Visible','off')
+        if isToggleshPoints == 1
+            for i=1:size(shPoints,2)
+            set(shPoints(i),'Visible','off')
+            end
+            isToggleshPoints = 0;
+
+        else
+            for i=1:size(shPoints,2)
+            set(shPoints(i),'Visible','on')
+            end
+            isToggleshPoints = 1;
         end
-        isToggleshPoints = 0;
-        
-    else
-        for i=1:size(shPoints,2)
-        set(shPoints(i),'Visible','on')
-        end
-        isToggleshPoints = 1;
-    end
 
     
 
-% --- Executes on key press with focus on togglePoints and none of its controls.
-function togglePoints_KeyPressFcn(hObject, eventdata, handles)
-% hObject    handle to togglePoints (see GCBO)
-% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+
+% --- Executes on button press in pushbutton16.
+function pushbutton16_Callback(hObject, eventdata, handles)
+    showNextImage();
+
+
+% --- Executes on button press in pushbutton17.
+function pushbutton17_Callback(hObject, eventdata, handles)
+    global currentImageIndex;
+    if currentImageIndex > 1
+        currentImageIndex = currentImageIndex-2;
+        showNextImage();
+    end
+% hObject    handle to pushbutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

@@ -1,4 +1,4 @@
-function [net,traininfo]=trainCNN(X,T)
+function [net,traininfo]=trainCNN(X,T,W)
 
 % X=randn(32,32,1,5000);
 % T=categorical(randn(5000,1)>0.5);
@@ -12,28 +12,28 @@ num_clases=length(unique(T(:)));
 
 % Two class
 % define network
-ks=3;           % kernel size (3x3)
+ks=3;          % kernel size (3x3)
 numfilters=[32,64,128]; % cambiar a 128
 layers = [imageInputLayer([s1(1) s1(2) 1]);
-          convolution2dLayer(ks,numfilters(1));   %16 filtros de 5x5
-          %batchNormalizationLayer();
-          reluLayer();
-          maxPooling2dLayer(2,'Stride',1);
-          convolution2dLayer(ks,numfilters(2));   %16 filtros de 5x5
-          %batchNormalizationLayer();
-          reluLayer();
-          maxPooling2dLayer(2,'Stride',1);
-          convolution2dLayer(ks,numfilters(3));   %16 filtros de 5x5
-          %batchNormalizationLayer();
-          reluLayer();
-          maxPooling2dLayer(2,'Stride',1);
-          fullyConnectedLayer(num_clases^2);  
-          %dropoutLayer(0.5);
-          fullyConnectedLayer(num_clases);         
-          softmaxLayer();
-          classificationLayer()];
-      
-options = trainingOptions('sgdm','MaxEpochs',150,'InitialLearnRate',0.01,'ExecutionEnvironment','gpu');
+      convolution2dLayer(ks,numfilters(1));   %16 filtros de 5x5
+      %batchNormalizationLayer();
+      reluLayer();
+      maxPooling2dLayer(2,'Stride',1);
+      convolution2dLayer(ks,numfilters(2));   %16 filtros de 5x5
+      %batchNormalizationLayer();
+      reluLayer();
+      maxPooling2dLayer(2,'Stride',1);
+      convolution2dLayer(ks,numfilters(3));   %16 filtros de 5x5
+      %batchNormalizationLayer();
+      reluLayer();
+      maxPooling2dLayer(2,'Stride',1);
+      fullyConnectedLayer(num_clases^2);  
+      %dropoutLayer(0.5);
+      fullyConnectedLayer(num_clases);         
+      softmaxLayer();
+      classificationLayer()];
+
+options = trainingOptions('sgdm','MaxEpochs',200,'InitialLearnRate',0.01,'ExecutionEnvironment','gpu');
 rng('default') % For reproducibility      
 [net,traininfo] = trainNetwork(X,categorical(single(T)),layers,options);
 
