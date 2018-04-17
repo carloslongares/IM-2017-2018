@@ -149,6 +149,7 @@ function pushbutton1_Callback(hObject, eventdata, handles)
         set(findobj('Tag','popupmenu1'), 'Enable', 'on');
         set(findobj('Tag','StartSelectionBtn'), 'Enable', 'on');
         set(findobj('Tag','pushbutton9'), 'Enable', 'on');
+        set(findobj('Tag','lastDiceText'), 'String', 'Last Dice: No_Test_Info');
     end
 
     
@@ -162,6 +163,8 @@ function showNextImage()
     global currentImage;
     global currentImageMask;
     
+    set(findobj('Tag','lastDiceText'), 'String', 'Last Dice: No_Test_Info');
+    
     currentImageIndex = currentImageIndex+1;
     if currentImageIndex <= imagesNumber
         %Imagenes originales
@@ -173,6 +176,7 @@ function showNextImage()
         currentImageSize = size(currentImage);
         imshow(currentImage,[]);
     end
+    
 
     
     
@@ -220,9 +224,9 @@ function pushbutton9_Callback(hObject, eventdata, handles)
         [samples2,classes2]=shuffleRand4D(samples,classes);
     end
 
-    dialog = displayLoading('training network ...','Loading');
+    
     [myNet,traininfo] = trainCNN(samples2,classes2);
-    deleteDialog(dialog);
+    
     
     net = myNet;
 
@@ -331,6 +335,7 @@ function test()
     imshow(imageOv,[]);
     showPoints();
     dice = [dice 2*nnz(binaryMask&currentImageMask)/(nnz(binaryMask) + nnz(currentImageMask));]
+    set(findobj('Tag','lastDiceText'), 'String', ['Last Dice: ' num2str(dice(end))]);
     sizePoints = size(IControlPoints);
     numPoints = [numPoints sizePoints(1)];
     

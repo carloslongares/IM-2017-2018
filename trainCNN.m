@@ -1,5 +1,12 @@
 function [net,traininfo]=trainCNN(X,T,W)
 
+
+%Display Training GUI
+h_delete = displayLoading('Training...','Train');
+pause(0.5);
+%END display Training GUI
+
+
 % X=randn(32,32,1,5000);
 % T=categorical(randn(5000,1)>0.5);
 % [net]=trainCNN(X,T)
@@ -36,5 +43,9 @@ layers = [imageInputLayer([s1(1) s1(2) 1]);
 options = trainingOptions('sgdm','MaxEpochs',200,'InitialLearnRate',0.01,'ExecutionEnvironment','gpu');
 rng('default') % For reproducibility      
 [net,traininfo] = trainNetwork(X,categorical(single(T)),layers,options);
+
+%GUI Show finish mesg. with info
+displayInfo(h_delete,traininfo)
+
 
 
